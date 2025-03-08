@@ -1,0 +1,9 @@
+{
+  "realm": "expense-tracker",
+  "auth-server-url": "http://localhost:8080",
+  "ssl-required": "none",
+  "resource": "expense-app",
+  "credentials": {
+    "secret": "OKcfDbBVo7jUSklH25VodQwQy3ffTdAe"
+  }
+}
