@@ -1,6 +1,6 @@
 package com.expense.auth;
 
-import org.junit.jupiter.api.Assertions;
+import com.expense.dtos.LoginDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.authorization.client.AuthzClient;
@@ -12,6 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ApiTest {
@@ -49,8 +52,21 @@ public class ApiTest {
         ResponseEntity<UserRepresentation> entity = restTemplate.exchange(
                 BASE_URL.formatted(port, "users/%s".formatted(username)),
                 HttpMethod.GET, new HttpEntity<>(headers), UserRepresentation.class);
-        Assertions.assertNotNull(entity.getBody());
-        Assertions.assertEquals(username, entity.getBody().getUsername());
-        Assertions.assertEquals(HttpStatus.OK, entity.getStatusCode());
+
+        assertNotNull(entity.getBody());
+        assertEquals(username, entity.getBody().getUsername());
+        assertEquals(HttpStatus.OK, entity.getStatusCode());
+    }
+
+    @Test
+    public void testSuccessLoginWithoutProvidingAccessToken() {
+        ResponseEntity<AccessTokenResponse> entity = restTemplate.exchange(
+                BASE_URL.formatted(port, "users/login"),
+                HttpMethod.POST, new HttpEntity<>(new LoginDto(username, password)),
+                AccessTokenResponse.class);
+
+        assertNotNull(entity.getBody());
+        assertNotNull(entity.getBody().getToken());
+        assertEquals(HttpStatus.OK, entity.getStatusCode());
     }
 }
