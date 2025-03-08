@@ -1,6 +1,7 @@
 package com.expense.auth;
 
-import com.expense.dtos.LoginDto;
+import com.expense.dtos.UserCredentials;
+import com.expense.utils.EncryptionUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.authorization.client.AuthzClient;
@@ -25,6 +26,8 @@ public class ApiTest {
 
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private EncryptionUtil encryptionUtil;
 
     @Value("${test.username}")
     private String username;
@@ -38,7 +41,9 @@ public class ApiTest {
     void setUp() {
         // No need to use RestTemplate for getting token from Keycloak
         // Use AuthzClient API from Keycloak community
-        this.tokenResponse = AuthzClient.create().obtainAccessToken(username, password);
+        tokenResponse = AuthzClient.create().obtainAccessToken(username, password);
+        encryptionUtil.setEncryptionCipher("AES");
+        encryptionUtil.setEncryptionKey("kjd78nf53ksiodnf");
     }
 
     /**
@@ -59,10 +64,10 @@ public class ApiTest {
     }
 
     @Test
-    public void testSuccessLoginWithoutProvidingAccessToken() {
+    public void testSuccessLoginWithoutProvidingAccessToken() throws Exception {
         ResponseEntity<AccessTokenResponse> entity = restTemplate.exchange(
                 BASE_URL.formatted(port, "users/login"),
-                HttpMethod.POST, new HttpEntity<>(new LoginDto(username, password)),
+                HttpMethod.POST, new HttpEntity<>(new UserCredentials(username, encryptionUtil.encrypt(password))),
                 AccessTokenResponse.class);
 
         assertNotNull(entity.getBody());

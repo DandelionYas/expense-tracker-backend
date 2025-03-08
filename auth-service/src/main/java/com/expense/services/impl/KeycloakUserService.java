@@ -3,8 +3,11 @@ package com.expense.services.impl;
 import com.expense.configs.KeycloakProperties;
 import com.expense.exceptions.UserNotFoundException;
 import com.expense.services.UserService;
+import com.expense.utils.EncryptionUtil;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.authorization.client.AuthzClient;
+import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,7 @@ public class KeycloakUserService implements UserService {
 
     private final Keycloak keycloak;
     private final KeycloakProperties keycloakProperties;
+    private final EncryptionUtil encryptionUtil;
 
     /**
      * Connect to Keycloak and find a user by the input username phrase
@@ -34,5 +38,19 @@ public class KeycloakUserService implements UserService {
         }
 
         return userRepresentations.getFirst();
+    }
+
+    /**
+     * Decrypt password and refer to Keycloak for AccessToken
+     * @param username user's username
+     * @param password user's encrypted password
+     * @return AccessToken
+     * todo: exception handling
+     * @throws Exception in case of decrypt or get token issues
+     */
+    @Override
+    public AccessTokenResponse login(String username, String password) throws Exception {
+        String plainPassword = encryptionUtil.decrypt(password);
+        return AuthzClient.create().obtainAccessToken(username, plainPassword);
     }
 }
