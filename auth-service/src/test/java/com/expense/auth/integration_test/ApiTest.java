@@ -2,6 +2,8 @@ package com.expense.auth.integration_test;
 
 import com.expense.dtos.UserRecord;
 import com.expense.utils.EncryptionUtil;
+import jakarta.ws.rs.core.Response;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.authorization.client.AuthzClient;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import static com.expense.auth.configs.Constants.BASE_URL;
@@ -70,5 +73,23 @@ public class ApiTest {
         assertNotNull(entity.getBody());
         assertEquals(username, entity.getBody().getUsername());
         assertEquals(HttpStatus.OK, entity.getStatusCode());
+    }
+
+    /**
+     * Creating user has effect on keycloak
+     * So for integration test, I decided to only test existing user
+     * Conflict response will come back from keycloak
+     */
+    @Test
+    public void testReturningConflictWhenCreatingExistingUser() throws Exception {
+        UserRecord userRecord = new UserRecord(username, "a@b.com", "Yaser", "Ghaderipour", encryptionUtil.encrypt(password));
+        try {
+            ResponseEntity<Response.StatusType> entity = restTemplate.exchange(
+                    BASE_URL.formatted(port, "users/signup"),
+                    HttpMethod.POST, new HttpEntity<>(userRecord),
+                    Response.StatusType.class);
+        } catch (Exception e) {
+            Assertions.assertEquals(HttpStatus.CONFLICT, ((HttpClientErrorException.Conflict) e).getStatusCode());
+        }
     }
 }
