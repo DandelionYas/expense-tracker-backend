@@ -1,6 +1,7 @@
 package com.expense.services.impl;
 
 import com.expense.configs.KeycloakProperties;
+import com.expense.dtos.UserCreationResponse;
 import com.expense.dtos.UserRecord;
 import com.expense.exceptions.UserNotFoundException;
 import com.expense.services.UserService;
@@ -32,7 +33,7 @@ public class KeycloakUserService implements UserService {
      * @throws Exception in case of password decryption or API call issue
      */
     @Override
-    public Response createUser(UserRecord user) throws Exception {
+    public UserCreationResponse createUser(UserRecord user) throws Exception {
         UserRepresentation keycloakUser = new UserRepresentation();
         keycloakUser.setUsername(user.username());
         keycloakUser.setFirstName(user.firstName());
@@ -48,7 +49,8 @@ public class KeycloakUserService implements UserService {
         credential.setValue(plainPassword);
         keycloakUser.setCredentials(List.of(credential));
 
-        return getUsersResource().create(keycloakUser);
+        Response keycloakResponse = getUsersResource().create(keycloakUser);
+        return new UserCreationResponse(keycloakResponse.getStatusInfo(), getUser(user.username()));
     }
 
     /**

@@ -1,8 +1,8 @@
 package com.expense.controllers;
 
+import com.expense.dtos.UserCreationResponse;
 import com.expense.dtos.UserRecord;
 import com.expense.services.UserService;
-import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -17,10 +17,16 @@ public class UserController {
 
     private final UserService userService;
 
+    /**
+     * Create user
+     * @param userRecord contains user's information
+     * @return UserRepresentation containing
+     * @throws Exception
+     */
     @PostMapping("/signup")
-    public ResponseEntity<Response.StatusType> createUser(@RequestBody UserRecord userRecord) throws Exception {
-        Response response = userService.createUser(userRecord);
-        return new ResponseEntity<>(response.getStatusInfo(), HttpStatus.valueOf(response.getStatus()));
+    public ResponseEntity<UserRepresentation> createUser(@RequestBody UserRecord userRecord) throws Exception {
+        UserCreationResponse response = userService.createUser(userRecord);
+        return new ResponseEntity<>(response.user(), HttpStatus.valueOf(response.statusType().getStatusCode()));
     }
 
     /**
