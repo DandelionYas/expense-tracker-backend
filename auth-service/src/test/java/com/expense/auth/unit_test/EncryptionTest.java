@@ -1,4 +1,4 @@
-package com.expense.auth;
+package com.expense.auth.unit_test;
 
 import com.expense.utils.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
