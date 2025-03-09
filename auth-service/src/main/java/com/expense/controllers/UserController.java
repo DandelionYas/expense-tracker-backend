@@ -1,11 +1,12 @@
 package com.expense.controllers;
 
-import com.expense.dtos.UserCreationResponse;
-import com.expense.dtos.UserRecord;
+import com.expense.dtos.LoginDto;
+import com.expense.dtos.UserRequestDto;
+import com.expense.dtos.UserResponseDto;
 import com.expense.services.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.AccessTokenResponse;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,25 +20,26 @@ public class UserController {
 
     /**
      * Create user
-     * @param userRecord contains user's information
+     *
+     * @param userRequestDto contains user's information
      * @return UserRepresentation containing
      * @throws Exception
      */
     @PostMapping("/signup")
-    public ResponseEntity<UserRepresentation> createUser(@RequestBody UserRecord userRecord) throws Exception {
-        UserCreationResponse response = userService.createUser(userRecord);
-        return new ResponseEntity<>(response.user(), HttpStatus.valueOf(response.statusType().getStatusCode()));
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody @Valid UserRequestDto userRequestDto) throws Exception {
+        return new ResponseEntity<>(userService.createUser(userRequestDto), HttpStatus.CREATED);
     }
 
     /**
      * A public API to grant users and generated jwt token
-     * @param userRecord user's credentials
+     *
+     * @param loginDto user's credentials
      * @return AccessToken
      * @throws Exception
      */
     @PostMapping("/login")
-    public AccessTokenResponse login(@RequestBody UserRecord userRecord) throws Exception {
-        return userService.login(userRecord.username(), userRecord.password());
+    public AccessTokenResponse login(@RequestBody @Valid LoginDto loginDto) throws Exception {
+        return userService.login(loginDto.username(), loginDto.password());
     }
 
     /**
@@ -46,16 +48,17 @@ public class UserController {
      * @return UserRepresentation object containing User Details
      */
     @GetMapping("/{username}")
-    public UserRepresentation getUser(@PathVariable("username") String username) {
+    public UserResponseDto getUser(@PathVariable(value = "username") String username) {
         return userService.getUser(username);
     }
 
     /**
      * Removing a user by id
+     *
      * @param userId user's id
      */
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable("id") String userId) {
+    public void deleteUser(@PathVariable(value = "id") String userId) {
         userService.deleteUser(userId);
     }
 }

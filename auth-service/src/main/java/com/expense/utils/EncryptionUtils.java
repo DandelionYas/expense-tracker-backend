@@ -16,7 +16,7 @@ import java.util.Base64;
  */
 @Setter
 @Component
-public class EncryptionUtil {
+public class EncryptionUtils {
 
     @Value("${login.encryption.key}")
     private String encryptionKey;

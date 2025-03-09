@@ -1,11 +1,13 @@
 package com.expense.services.impl;
 
 import com.expense.configs.KeycloakProperties;
-import com.expense.dtos.UserCreationResponse;
-import com.expense.dtos.UserRecord;
+import com.expense.dtos.UserRequestDto;
+import com.expense.dtos.UserResponseDto;
+import com.expense.exceptions.UserNotCreatedException;
 import com.expense.exceptions.UserNotFoundException;
+import com.expense.mappers.UserMapper;
 import com.expense.services.UserService;
-import com.expense.utils.EncryptionUtil;
+import com.expense.utils.EncryptionUtils;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.Keycloak;
@@ -14,6 +16,7 @@ import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,33 +27,33 @@ public class KeycloakUserService implements UserService {
 
     private final Keycloak keycloak;
     private final KeycloakProperties keycloakProperties;
-    private final EncryptionUtil encryptionUtil;
+    private final EncryptionUtils encryptionUtils;
 
     /**
      * Create user by calling Keycloak API
+     *
      * @param user user's information
      * @return Response object containing response status
      * @throws Exception in case of password decryption or API call issue
      */
     @Override
-    public UserCreationResponse createUser(UserRecord user) throws Exception {
-        UserRepresentation keycloakUser = new UserRepresentation();
-        keycloakUser.setUsername(user.username());
-        keycloakUser.setFirstName(user.firstName());
-        keycloakUser.setLastName(user.lastName());
-        keycloakUser.setEmail(user.email());
+    public UserResponseDto createUser(UserRequestDto user) throws Exception {
+        UserRepresentation keycloakUser = UserMapper.INSTANCE.dtoToEntity(user);
         keycloakUser.setEnabled(true);
         keycloakUser.setEmailVerified(false);
 
-        CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setTemporary(false);
-        String plainPassword = encryptionUtil.decrypt(user.password());
-        credential.setValue(plainPassword);
-        keycloakUser.setCredentials(List.of(credential));
+        if (keycloakUser.getCredentials()!= null && keycloakUser.getCredentials().isEmpty()) {
+            CredentialRepresentation credential = keycloakUser.getCredentials().get(0);
+            String plainPassword = encryptionUtils.decrypt(credential.getValue());
+            credential.setValue(plainPassword);
+        }
 
         Response keycloakResponse = getUsersResource().create(keycloakUser);
-        return new UserCreationResponse(keycloakResponse.getStatusInfo(), getUser(user.username()));
+        if (HttpStatus.CREATED.value() != keycloakResponse.getStatus()) {
+            throw new UserNotCreatedException(keycloakResponse.getStatusInfo().getReasonPhrase());
+        }
+
+        return getUser(user.username());
     }
 
     /**
@@ -64,16 +67,17 @@ public class KeycloakUserService implements UserService {
      */
     @Override
     public AccessTokenResponse login(String username, String password) throws Exception {
-        String plainPassword = encryptionUtil.decrypt(password);
+        String plainPassword = encryptionUtils.decrypt(password);
         return AuthzClient.create().obtainAccessToken(username, plainPassword);
     }
 
     /**
      * Connect to Keycloak and find a user by the input username phrase
+     *
      * @param username input username of the user we want to find
      * @return UserRepresentation object from Keycloak
      */
-    public UserRepresentation getUser(String username) {
+    public UserResponseDto getUser(String username) {
         // Search for exact username phrase to return one user
         boolean exactSearchPhrase = true;
         List<UserRepresentation> userRepresentations = getUsersResource()
@@ -83,7 +87,7 @@ public class KeycloakUserService implements UserService {
             throw new UserNotFoundException(username);
         }
 
-        return userRepresentations.getFirst();
+        return UserMapper.INSTANCE.entityToDto(userRepresentations.getFirst());
     }
 
     @Override

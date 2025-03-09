@@ -1,15 +1,15 @@
 package com.expense.auth.integration_test;
 
-import com.expense.dtos.UserRecord;
-import com.expense.utils.EncryptionUtil;
-import jakarta.ws.rs.core.Response;
+import com.expense.dtos.LoginDto;
+import com.expense.dtos.UserRequestDto;
+import com.expense.dtos.UserResponseDto;
+import com.expense.utils.EncryptionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.representations.AccessTokenResponse;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +28,7 @@ public class ApiTest {
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
-    private EncryptionUtil encryptionUtil;
+    private EncryptionUtils encryptionUtils;
     @Value("${test.username}")
     private String username;
     @Value("${test.password}")
@@ -52,7 +52,7 @@ public class ApiTest {
     public void testSuccessLoginWithoutProvidingAccessToken() throws Exception {
         ResponseEntity<AccessTokenResponse> entity = restTemplate.exchange(
                 BASE_URL.formatted(port, "users/login"),
-                HttpMethod.POST, new HttpEntity<>(new UserRecord(username, encryptionUtil.encrypt(password))),
+                HttpMethod.POST, new HttpEntity<>(new LoginDto(username, encryptionUtils.encrypt(password))),
                 AccessTokenResponse.class);
 
         assertNotNull(entity.getBody());
@@ -69,12 +69,12 @@ public class ApiTest {
     public void testGettingUserFromKeycloakByUsername() {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(tokenResponse.getToken());
-        ResponseEntity<UserRepresentation> entity = restTemplate.exchange(
+        ResponseEntity<UserRequestDto> entity = restTemplate.exchange(
                 BASE_URL.formatted(port, "users/%s".formatted(username)),
-                HttpMethod.GET, new HttpEntity<>(headers), UserRepresentation.class);
+                HttpMethod.GET, new HttpEntity<>(headers), UserRequestDto.class);
 
         assertNotNull(entity.getBody());
-        assertEquals(username, entity.getBody().getUsername());
+        assertEquals(username, entity.getBody().username());
         assertEquals(HttpStatus.OK, entity.getStatusCode());
     }
 
@@ -86,12 +86,12 @@ public class ApiTest {
     @Test
     @Order(3)
     public void testReturningConflictWhenCreatingExistingUser() throws Exception {
-        UserRecord userRecord = new UserRecord(username, "a@b.com", "Yaser", "Ghaderipour", encryptionUtil.encrypt(password));
+        UserRequestDto userRequestDto = new UserRequestDto(username, "a@b.com", "Yaser", "Ghaderipour", encryptionUtils.encrypt(password));
         try {
-            ResponseEntity<Response.StatusType> entity = restTemplate.exchange(
+            ResponseEntity<UserRequestDto> entity = restTemplate.exchange(
                     BASE_URL.formatted(port, "users/signup"),
-                    HttpMethod.POST, new HttpEntity<>(userRecord),
-                    Response.StatusType.class);
+                    HttpMethod.POST, new HttpEntity<>(userRequestDto),
+                    UserRequestDto.class);
         } catch (Exception e) {
             Assertions.assertEquals(HttpStatus.CONFLICT, ((HttpClientErrorException.Conflict) e).getStatusCode());
         }
@@ -104,16 +104,16 @@ public class ApiTest {
     @Order(4)
     public void testCreatingUserSuccessfully() throws Exception {
         String tempUsername = "temp";
-        UserRecord userRecord = new UserRecord(tempUsername, "a@b.com", "Yaser", "Ghaderipour", encryptionUtil.encrypt(password));
+        UserRequestDto userRequestDto = new UserRequestDto(tempUsername, "a@b.com", "Yaser", "Ghaderipour", encryptionUtils.encrypt(password));
 
-        ResponseEntity<UserRepresentation> response = restTemplate.exchange(
+        ResponseEntity<UserResponseDto> response = restTemplate.exchange(
                 BASE_URL.formatted(port, "users/signup"),
-                HttpMethod.POST, new HttpEntity<>(userRecord),
-                UserRepresentation.class);
+                HttpMethod.POST, new HttpEntity<>(userRequestDto),
+                UserResponseDto.class);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        this.tempUserId = response.getBody().getId();
-        assertEquals(response.getBody().getUsername(), tempUsername);
+        this.tempUserId = response.getBody().id();
+        assertEquals(tempUsername, response.getBody().username());
     }
 
     /**
