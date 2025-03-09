@@ -49,4 +49,13 @@ public class UserController {
     public UserRepresentation getUser(@PathVariable("username") String username) {
         return userService.getUser(username);
     }
+
+    /**
+     * Removing a user by id
+     * @param userId user's id
+     */
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable("id") String userId) {
+        userService.deleteUser(userId);
+    }
 }

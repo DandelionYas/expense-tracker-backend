@@ -9,4 +9,5 @@ public interface UserService {
     UserCreationResponse createUser(UserRecord user) throws Exception;
     AccessTokenResponse login(String username, String password) throws Exception;
     UserRepresentation getUser(String username);
+    void deleteUser(String userId);
 }

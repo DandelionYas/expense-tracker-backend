@@ -86,6 +86,11 @@ public class KeycloakUserService implements UserService {
         return userRepresentations.getFirst();
     }
 
+    @Override
+    public void deleteUser(String userId) {
+        getUsersResource().delete(userId);
+    }
+
     /**
      * User management can be done by APIs provided in UsersResource
      * @return UsersResource
