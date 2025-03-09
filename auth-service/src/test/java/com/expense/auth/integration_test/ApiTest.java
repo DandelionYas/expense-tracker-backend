@@ -1,6 +1,6 @@
 package com.expense.auth.integration_test;
 
-import com.expense.dtos.UserCredentials;
+import com.expense.dtos.UserRecord;
 import com.expense.utils.EncryptionUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ public class ApiTest {
     public void testSuccessLoginWithoutProvidingAccessToken() throws Exception {
         ResponseEntity<AccessTokenResponse> entity = restTemplate.exchange(
                 BASE_URL.formatted(port, "users/login"),
-                HttpMethod.POST, new HttpEntity<>(new UserCredentials(username, encryptionUtil.encrypt(password))),
+                HttpMethod.POST, new HttpEntity<>(new UserRecord(username, encryptionUtil.encrypt(password))),
                 AccessTokenResponse.class);
 
         assertNotNull(entity.getBody());
