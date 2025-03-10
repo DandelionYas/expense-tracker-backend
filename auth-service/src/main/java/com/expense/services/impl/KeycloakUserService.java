@@ -1,11 +1,13 @@
 package com.expense.services.impl;
 
 import com.expense.configs.KeycloakProperties;
+import com.expense.dtos.AccessTokenDto;
 import com.expense.dtos.UserRequestDto;
 import com.expense.dtos.UserResponseDto;
 import com.expense.exceptions.PasswordDecryptionException;
 import com.expense.exceptions.UserNotCreatedException;
 import com.expense.exceptions.UserNotFoundException;
+import com.expense.mappers.AccessTokenMapper;
 import com.expense.mappers.UserMapper;
 import com.expense.services.UserService;
 import com.expense.utils.EncryptionUtils;
@@ -14,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.authorization.client.AuthzClient;
-import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,7 @@ public class KeycloakUserService implements UserService {
         keycloakUser.setEnabled(true);
         keycloakUser.setEmailVerified(false);
 
-        if (keycloakUser.getCredentials()!= null && keycloakUser.getCredentials().isEmpty()) {
+        if (keycloakUser.getCredentials()!= null && !keycloakUser.getCredentials().isEmpty()) {
             CredentialRepresentation credential = keycloakUser.getCredentials().get(0);
             String plainPassword;
             try {
@@ -70,14 +71,14 @@ public class KeycloakUserService implements UserService {
      * @return AccessToken
      */
     @Override
-    public AccessTokenResponse login(String username, String password) {
+    public AccessTokenDto login(String username, String password) {
         String plainPassword;
         try {
             plainPassword = encryptionUtils.decrypt(password);
         } catch (Exception e) {
             throw new PasswordDecryptionException("Unable to decrypt password", e);
         }
-        return AuthzClient.create().obtainAccessToken(username, plainPassword);
+        return AccessTokenMapper.INSTANCE.entityToDto(AuthzClient.create().obtainAccessToken(username, plainPassword));
     }
 
     /**

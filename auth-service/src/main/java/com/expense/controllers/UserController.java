@@ -1,5 +1,6 @@
 package com.expense.controllers;
 
+import com.expense.dtos.AccessTokenDto;
 import com.expense.dtos.LoginDto;
 import com.expense.dtos.UserRequestDto;
 import com.expense.dtos.UserResponseDto;
@@ -10,7 +11,6 @@ import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
-import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -53,7 +53,7 @@ public class UserController {
             @APIResponse(responseCode = "200", description = "User Logged In"),
             @APIResponse(responseCode = "400", description = "Validation Error or Password Decryption Error")})
     @PostMapping("/login")
-    public AccessTokenResponse login(@RequestBody @Valid LoginDto loginDto) {
+    public AccessTokenDto login(@RequestBody @Valid LoginDto loginDto) {
         return userService.login(loginDto.username(), loginDto.password());
     }
 

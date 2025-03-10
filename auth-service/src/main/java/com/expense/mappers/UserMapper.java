@@ -15,7 +15,7 @@ import org.mapstruct.factory.Mappers;
 public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
-    @Mapping(source = "password", target = "credentials", qualifiedByName = "mapperUtils" )
+    @Mapping(source = "password", target = "credentials", qualifiedByName = {"mapperUtils","passwordToCredentialRepresentation"})
     UserRepresentation dtoToEntity(UserRequestDto userRequestDto);
 
     UserResponseDto entityToDto(UserRepresentation entity);

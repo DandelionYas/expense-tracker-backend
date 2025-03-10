@@ -5,7 +5,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-//        (scanBasePackages = {"com.expense.*", "org.springdoc"})
 @EnableEncryptableProperties
 public class AuthApplication {
     public static void main(String[] args) {
