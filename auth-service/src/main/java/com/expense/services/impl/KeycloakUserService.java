@@ -3,6 +3,7 @@ package com.expense.services.impl;
 import com.expense.configs.KeycloakProperties;
 import com.expense.dtos.UserRequestDto;
 import com.expense.dtos.UserResponseDto;
+import com.expense.exceptions.PasswordDecryptionException;
 import com.expense.exceptions.UserNotCreatedException;
 import com.expense.exceptions.UserNotFoundException;
 import com.expense.mappers.UserMapper;
@@ -37,14 +38,19 @@ public class KeycloakUserService implements UserService {
      * @throws Exception in case of password decryption or API call issue
      */
     @Override
-    public UserResponseDto createUser(UserRequestDto user) throws Exception {
+    public UserResponseDto createUser(UserRequestDto user) {
         UserRepresentation keycloakUser = UserMapper.INSTANCE.dtoToEntity(user);
         keycloakUser.setEnabled(true);
         keycloakUser.setEmailVerified(false);
 
         if (keycloakUser.getCredentials()!= null && keycloakUser.getCredentials().isEmpty()) {
             CredentialRepresentation credential = keycloakUser.getCredentials().get(0);
-            String plainPassword = encryptionUtils.decrypt(credential.getValue());
+            String plainPassword;
+            try {
+                plainPassword = encryptionUtils.decrypt(credential.getValue());
+            } catch (Exception e) {
+                throw new PasswordDecryptionException("Unable to decrypt password", e);
+            }
             credential.setValue(plainPassword);
         }
 
@@ -62,12 +68,15 @@ public class KeycloakUserService implements UserService {
      * @param username user's username
      * @param password user's encrypted password
      * @return AccessToken
-     * todo: exception handling
-     * @throws Exception in case of decrypt or get token issues
      */
     @Override
-    public AccessTokenResponse login(String username, String password) throws Exception {
-        String plainPassword = encryptionUtils.decrypt(password);
+    public AccessTokenResponse login(String username, String password) {
+        String plainPassword;
+        try {
+            plainPassword = encryptionUtils.decrypt(password);
+        } catch (Exception e) {
+            throw new PasswordDecryptionException("Unable to decrypt password", e);
+        }
         return AuthzClient.create().obtainAccessToken(username, plainPassword);
     }
 

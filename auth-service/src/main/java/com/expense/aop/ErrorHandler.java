@@ -1,6 +1,7 @@
 package com.expense.aop;
 
 import com.expense.dtos.ErrorDto;
+import com.expense.exceptions.PasswordDecryptionException;
 import com.expense.exceptions.UserNotCreatedException;
 import com.expense.exceptions.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +18,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Exception handler to provide a clean API error output
+ * TODO: extract common parts to a common module
+ */
 @Slf4j
 @ControllerAdvice
 public class ErrorHandler {
@@ -45,6 +50,16 @@ public class ErrorHandler {
         return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(PasswordDecryptionException.class)
+    public ResponseEntity<ErrorDto> handlePasswordDecryptionException(PasswordDecryptionException e, HttpServletRequest request) {
+        ErrorDto errorDto = new ErrorDto(LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Password Decrypting Error",
+                StringUtils.truncate(e.getMessage(), 50),
+                request.getRequestURI(),
+                null);
+        return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorDto> handleValidationException(MethodArgumentNotValidException e, HttpServletRequest request) {
