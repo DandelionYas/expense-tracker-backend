@@ -84,7 +84,7 @@ public class KeycloakUserService implements UserService {
                 .search(username, exactSearchPhrase);
 
         if (userRepresentations.isEmpty()) {
-            throw new UserNotFoundException(username);
+            throw new UserNotFoundException("Unable to find user for the username: %s".formatted(username));
         }
 
         return UserMapper.INSTANCE.entityToDto(userRepresentations.getFirst());
