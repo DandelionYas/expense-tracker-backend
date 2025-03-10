@@ -68,7 +68,6 @@ public class UserController {
             @APIResponse(responseCode = "200", description = "User Found and returned"),
             @APIResponse(responseCode = "404", description = "User Not Found"),
             @APIResponse(responseCode = "400", description = "Validation Error")})
-    @PostMapping("/login")
     @GetMapping("/{username}")
     public UserResponseDto getUser(@PathVariable(value = "username")
                                    @Pattern(regexp = "^[a-z]+$", message = "Lowercase only allowed for username")
