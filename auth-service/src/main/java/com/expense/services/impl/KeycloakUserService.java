@@ -36,7 +36,7 @@ public class KeycloakUserService implements UserService {
      *
      * @param user user's information
      * @return Response object containing response status
-     * @throws Exception in case of password decryption or API call issue
+     * @throws PasswordDecryptionException in case of password decryption or API call issue
      */
     @Override
     public UserResponseDto createUser(UserRequestDto user) {
