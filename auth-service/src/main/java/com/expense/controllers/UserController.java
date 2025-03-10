@@ -13,6 +13,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,6 @@ public class UserController {
      *
      * @param userRequestDto contains user's information
      * @return UserRepresentation containing
-     * @throws Exception
      */
     @Operation(summary = "Crate New User", description = "REST endpoint that creates a user")
     @APIResponses(value = {
@@ -46,7 +46,6 @@ public class UserController {
      *
      * @param loginDto user's credentials
      * @return AccessToken
-     * @throws Exception
      */
     @Operation(summary = "Login User", description = "REST endpoint that provides access token for a user")
     @APIResponses(value = {
@@ -70,7 +69,8 @@ public class UserController {
             @APIResponse(responseCode = "400", description = "Validation Error")})
     @GetMapping("/{username}")
     public UserResponseDto getUser(@PathVariable(value = "username")
-                                   @Pattern(regexp = "^[a-z]+$", message = "Lowercase only allowed for username")
+                                   @Pattern(regexp = "^[a-z0-9_]+$",
+                                           message = "Lowercase letters, numbers, and underscores only allowed for username")
                                    String username) {
         return userService.getUser(username);
     }
@@ -83,10 +83,13 @@ public class UserController {
     @Operation(summary = "Delete User", description = "REST endpoint that deletes a user")
     @APIResponses(value = {
             @APIResponse(responseCode = "200", description = "User Deleted")})
-    // TODO: Define Roles and Only allow Admin to do this
     // TODO: Check if User exists and return not found
+    @PreAuthorize("hasRole('admin')")
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable(value = "id") String userId) {
+    public void deleteUser(@PathVariable(value = "id")
+                           @Pattern(regexp = "^[a-z0-9_]+$",
+                                   message = "Lowercase letters, numbers, and underscores only allowed for username")
+                           String userId) {
         userService.deleteUser(userId);
     }
 

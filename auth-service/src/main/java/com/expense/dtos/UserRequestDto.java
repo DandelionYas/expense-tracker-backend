@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 public record UserRequestDto(@NotBlank(message = "Username is mandatory")
-                             @Pattern(regexp = "^[a-z]+$", message = "Lowercase only allowed for username")
+                             @Pattern(regexp = "^[a-z0-9_]+$",
+                                     message = "Lowercase letters, numbers, and underscores only allowed for username")
                              String username,
                              @Email
                              String email,

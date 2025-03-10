@@ -9,6 +9,7 @@ import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -59,6 +60,17 @@ public class ErrorHandler {
                 request.getRequestURI(),
                 null);
         return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorDto> handleAccessDeniedException(AuthorizationDeniedException e, HttpServletRequest request) {
+        ErrorDto errorDto = new ErrorDto(LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "Access Denied Error",
+                StringUtils.truncate(e.getMessage(), 50),
+                request.getRequestURI(),
+                null);
+        return new ResponseEntity<>(errorDto, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
