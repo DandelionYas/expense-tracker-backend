@@ -9,7 +9,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.Id;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
