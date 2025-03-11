@@ -2,6 +2,7 @@ package com.expense.models;
 
 
 import jakarta.persistence.*;
+import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
@@ -13,6 +14,7 @@ import java.util.UUID;
  * User details is saved in Keycloak
  * No extra information is saved in here for now
  */
+@Data
 @Entity
 @Table(name = "users")
 public class User {

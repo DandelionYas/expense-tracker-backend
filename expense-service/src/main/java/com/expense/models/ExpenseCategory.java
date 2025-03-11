@@ -1,10 +1,12 @@
 package com.expense.models;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.List;
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(name = "expense_categories")
 public class ExpenseCategory {
