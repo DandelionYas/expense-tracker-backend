@@ -12,6 +12,12 @@
         <!--   Keycloak client version should be the same as docker image version  -->
         <keycloak.client.version>26.0.4</keycloak.client.version>
         <resteasy.version>6.2.5.Final</resteasy.version>
+        <!--   Google job properties for building docker image   -->
+        <jib.version>3.4.1</jib.version>
+        <jib.from.image>docker://alpine/java:21-jdk</jib.from.image>
+        <jib.from.image.platform.architecture.amd>amd64</jib.from.image.platform.architecture.amd>
+        <jib.from.image.platform.os>linux</jib.from.image.platform.os>
+        <jib.container.port>9000</jib.container.port>
     </properties>
 
     <dependencies>
@@ -79,4 +85,30 @@
             <version>${resteasy.version}</version>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib.version}</version>
+                <configuration>
+                    <from>
+                        <image>${jib.from.image}</image>
+                        <platforms>
+                            <platform>
+                                <architecture>${jib.from.image.platform.architecture.amd}</architecture>
+                                <os>${jib.from.image.platform.os}</os>
+                            </platform>
+                        </platforms>
+                    </from>
+                    <container>
+                        <ports>
+                            <port>${jib.container.port}</port>
+                        </ports>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                    </container>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
