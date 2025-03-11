@@ -23,6 +23,6 @@ public class User {
     @CreationTimestamp
     private Instant createdAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Expense> expenses;
 }

@@ -9,7 +9,7 @@ import java.util.UUID;
 @Table(name = "expense_categories")
 public class ExpenseCategory {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private UUID id;
 
     @Column(unique = true, nullable = false)
