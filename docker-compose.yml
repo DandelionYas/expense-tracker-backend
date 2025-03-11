@@ -10,9 +10,10 @@ services:
   postgres:
     image: postgres:latest
     environment:
-      POSTGRES_USER: expense_user
-      POSTGRES_PASSWORD: expense_password
-      POSTGRES_DB: expense_db
+      POSTGRES_USER: yaser
+      POSTGRES_PASSWORD: StrongPassword
+      POSTGRES_DB: expense_tracker
+      PGDATA: /var/lib/postgresql/pgdata
     ports:
       - "5432:5432"
 
