@@ -1,5 +1,6 @@
 package com.expense.auth.integration_test;
 
+import com.expense.dtos.AccessTokenDto;
 import com.expense.dtos.LoginDto;
 import com.expense.dtos.UserRequestDto;
 import com.expense.dtos.UserResponseDto;
@@ -13,7 +14,9 @@ import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -22,7 +25,7 @@ import static com.expense.auth.configs.Constants.BASE_URL;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ApiTest {
+public class AuthApiTest {
     @LocalServerPort
     private int port;
     @Autowired
@@ -50,13 +53,13 @@ public class ApiTest {
     @Test
     @Order(0)
     public void testSuccessLoginWithoutProvidingAccessToken() throws Exception {
-        ResponseEntity<AccessTokenResponse> entity = restTemplate.exchange(
+        ResponseEntity<AccessTokenDto> entity = restTemplate.exchange(
                 BASE_URL.formatted(port, "users/login"),
                 HttpMethod.POST, new HttpEntity<>(new LoginDto(username, encryptionUtils.encrypt(password))),
-                AccessTokenResponse.class);
+                AccessTokenDto.class);
 
         assertNotNull(entity.getBody());
-        assertNotNull(entity.getBody().getToken());
+        assertNotNull(entity.getBody().accessToken());
         assertEquals(HttpStatus.OK, entity.getStatusCode());
     }
 
