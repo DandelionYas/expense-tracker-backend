@@ -68,6 +68,15 @@ The remaining todo list for this service:
 - ⚠️ Implement addRole API 
 - ⚠️ Add logs in all required levels
 
+## Common module
+
+It contains all the common configurations that are required by all services including:
+- ✅ Global Error Handling
+- ✅ Jwt Role Converter to cover the difference between Keycloak and Spring Security role names
+- ✅ RabbitMQ configs to be used in expense-service and notification service
+- ✅ Logging filter for http requests which is helpful for debugging
+- ✅ A custom config for swagger which can be customized for each service
+
 ## Expense Service
 
 Expense Service exposes APIs to:

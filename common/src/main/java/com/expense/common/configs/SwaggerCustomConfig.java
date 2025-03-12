@@ -10,6 +10,6 @@ public class SwaggerCustomConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .info(new Info().title("Expense Tracker Auth API").version("1.0").description("API Documentation"));
+                .info(new Info().title("Expense Tracker API").version("1.0").description("API Documentation"));
     }
 }
