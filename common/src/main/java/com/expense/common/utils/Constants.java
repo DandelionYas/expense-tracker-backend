@@ -5,4 +5,5 @@ public class Constants {
     public static final String SPRING_ROLE_PREFIX = "ROLE_";
     public static final String CLAIM_KEY = "resource_access";
     public static final String ROLES_KEY = "roles";
+    public static final String TRUCK_ID = "trackId";
 }
