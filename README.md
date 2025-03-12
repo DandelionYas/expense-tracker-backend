@@ -85,9 +85,16 @@ Expense Service exposes APIs to:
 * Generate monthly reports.
 * Emit events via RabbitMQ when a report is generated.
 
+- ✅ some APIs implemented to save, delete and retrieve expenses
+- ✅ A monthly scheduler added for monthly reports
+- ✅ The rabbitMq producer also configured to send message that will be consumed by notification service  
+
+- ⚠️ The development of this service also remained incomplete. However, I have all the items mentioned for auth-service in mind to be developed for all services.  
+
 ## Notification Service
 
 Notification Service listens to report generation events and send custom alerts
+- ⚠️ unfortunately there was no time remaining to develop this service
 
 ### Jasypt Configuration
 Set Environment Variable: 
