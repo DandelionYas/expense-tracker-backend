@@ -53,6 +53,20 @@ To access open api documentation of Auth Service, you can refer to the following
 ```
 https://localhost:9000/swagger-ui/index.html
 ```
+This service's development progress is much further than the others:
+- ✅ Integrate the last version of Spring security with Keycloak for authentication and method security (authorization)
+- ✅ Open API Documentation
+- ✅ Rest Service Error handling
+- ✅ Use Google Jib to build docker image
+- ✅ Write API and Unit Tests
+- ✅ Secure the API by self-signed SSL keys
+- ✅ Secure the credentials in application.properties by Jasypt maven plugin
+- ✅ Dto validation
+- ✅ Use mapstruct as a clean way to map entities to response objects
+
+The remaining todo list for this service:
+- ⚠️ Implement addRole API 
+- ⚠️ Add logs in all required levels
 
 ## Expense Service
 
