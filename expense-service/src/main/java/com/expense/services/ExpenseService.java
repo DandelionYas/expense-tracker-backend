@@ -11,8 +11,9 @@ import com.expense.repositories.ExpenseCategoryRepository;
 import com.expense.repositories.ExpenseRepository;
 import com.expense.repositories.UsersRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +29,7 @@ public class ExpenseService {
     private final ExpenseCategoryRepository categoryRepository;
 
     @Transactional
-    public ExpenseResponseDto addExpense(ExpenseDto expenseDto) {
+    public ExpenseResponseDto createExpense(ExpenseDto expenseDto) {
         Expense expense = ExpenseMapper.INSTANCE.dtoToEntity(expenseDto);
 
         Optional<User> existingUser = usersRepository.findById(expense.getUser().getId());
@@ -49,5 +50,14 @@ public class ExpenseService {
         }
 
         expenseRepository.deleteById(expenseId);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ExpenseResponseDto> getExpensesByUser(UUID userId, Pageable pageable) {
+        Page<Expense> expenses = expenseRepository.findByUserId(userId, pageable);
+        return new PageImpl<>(
+                expenses.map(ExpenseMapper.INSTANCE::entityToDto).toList(),
+                expenses.getPageable(),
+                expenses.getTotalElements());
     }
 }
