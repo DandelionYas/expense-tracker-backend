@@ -1,4 +1,4 @@
-package com.expense.configs;
+package com.expense.common.configs;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

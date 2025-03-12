@@ -1,4 +1,4 @@
-package com.expense.configs;
+package com.expense.common.configs;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

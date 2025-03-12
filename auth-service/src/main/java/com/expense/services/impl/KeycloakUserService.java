@@ -1,6 +1,6 @@
 package com.expense.services.impl;
 
-import com.expense.configs.KeycloakProperties;
+import com.expense.common.configs.KeycloakProperties;
 import com.expense.dtos.AccessTokenDto;
 import com.expense.dtos.UserRequestDto;
 import com.expense.dtos.UserResponseDto;

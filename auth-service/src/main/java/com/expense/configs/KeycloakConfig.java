@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 public class KeycloakConfig {
-    private final KeycloakProperties keycloakProperties;
+    private final com.expense.common.configs.KeycloakProperties keycloakProperties;
 
     @Bean
     public Keycloak keycloak() {

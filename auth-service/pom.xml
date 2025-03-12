@@ -21,6 +21,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.expense</groupId>
+            <artifactId>common</artifactId>
+            <version>${common.version}</version>
+        </dependency>
         <!--   User Management Dependencies   -->
         <dependency>
             <groupId>org.keycloak</groupId>

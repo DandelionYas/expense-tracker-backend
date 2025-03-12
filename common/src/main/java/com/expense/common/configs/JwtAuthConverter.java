@@ -1,7 +1,6 @@
-package com.expense.configs;
+package com.expense.common.configs;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -20,18 +19,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.expense.common.utils.Constants.*;
+
 /**
  * Spring has a default prefix for roles: ROLE_
  * @see SecurityExpressionRoot
  * For smooth working with keycloak the spring's prefix should be added to Role name:
- * @see com.expense.configs.JwtAuthConverter#SPRING_ROLE_PREFIX
+ * @see com.expense.common.utils.Constants#SPRING_ROLE_PREFIX
  */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationToken> {
-    private final static String SPRING_ROLE_PREFIX = "ROLE_";
-    private final static String CLAIM_KEY = "resource_access";
-    private final static String ROLES_KEY = "roles";
     private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
     private final KeycloakProperties keycloakProperties;
 
