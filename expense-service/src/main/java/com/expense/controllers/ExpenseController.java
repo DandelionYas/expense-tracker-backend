@@ -34,4 +34,6 @@ public class ExpenseController {
     public Page<ExpenseResponseDto> getExpensesByUser(@RequestParam("userId") UUID userId, Pageable pageable) {
         return expenseService.getExpensesByUser(userId, pageable);
     }
+
+    // TODO: Implement All required APIs
 }
