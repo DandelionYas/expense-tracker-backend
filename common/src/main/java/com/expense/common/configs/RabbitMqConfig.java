@@ -17,11 +17,6 @@ public class RabbitMqConfig {
     private final RabbitMqProperties rabbitMqProperties;
 
     @Bean
-    public Queue queue() {
-        return QueueBuilder.durable(rabbitMqProperties.getQueueName()).build();
-    }
-
-    @Bean
     public Queue jsonQueue() {
         return QueueBuilder.durable(rabbitMqProperties.getJsonQueueName()).build();
     }
