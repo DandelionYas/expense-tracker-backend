@@ -1,4 +1,4 @@
-package com.expense.dtos;
+package com.expense.common.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

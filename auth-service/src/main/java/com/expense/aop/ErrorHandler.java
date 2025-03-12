@@ -1,6 +1,7 @@
 package com.expense.aop;
 
-import com.expense.dtos.ErrorDto;
+import com.expense.common.aop.GlobalErrorHandler;
+import com.expense.common.dtos.ErrorDto;
 import com.expense.exceptions.PasswordDecryptionException;
 import com.expense.exceptions.UserNotCreatedException;
 import com.expense.exceptions.UserNotFoundException;
@@ -21,7 +22,6 @@ import java.util.List;
 
 /**
  * Exception handler to provide a clean API error output
- * TODO: extract common parts to a common module
  */
 @Slf4j
 @ControllerAdvice
@@ -60,50 +60,5 @@ public class ErrorHandler {
                 request.getRequestURI(),
                 null);
         return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<ErrorDto> handleAccessDeniedException(AuthorizationDeniedException e, HttpServletRequest request) {
-        ErrorDto errorDto = new ErrorDto(LocalDateTime.now(),
-                HttpStatus.FORBIDDEN.value(),
-                "Access Denied Error",
-                StringUtils.truncate(e.getMessage(), 50),
-                request.getRequestURI(),
-                null);
-        return new ResponseEntity<>(errorDto, HttpStatus.FORBIDDEN);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorDto> handleValidationException(MethodArgumentNotValidException e, HttpServletRequest request) {
-        List<String> errorList = e.getBindingResult().getAllErrors().stream().map(ObjectError::toString).toList();
-        ErrorDto errorDto = new ErrorDto(LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Binding Validation Error",
-                StringUtils.truncate(e.getMessage(), 50),
-                request.getRequestURI(),
-                errorList);
-        return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorDto> handleConstrainValidationException(ValidationException e, HttpServletRequest request) {
-        ErrorDto errorDto = new ErrorDto(LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Constrain Validation Error",
-                StringUtils.truncate(e.getMessage(), 50),
-                request.getRequestURI(),
-                null);
-        return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(Throwable.class)
-    public ResponseEntity<ErrorDto> handleGeneralException(Throwable e, HttpServletRequest request) {
-        ErrorDto errorDto = new ErrorDto(LocalDateTime.now(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Error: %s, Cause: %s".formatted(e.getClass().getSimpleName(), e.getCause()),
-                StringUtils.truncate(e.getMessage(), 50),
-                request.getRequestURI(),
-                null);
-        return new ResponseEntity<>(errorDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

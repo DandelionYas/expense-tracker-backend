@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "rabbitmq")
 public class RabbitMqProperties {
-    private String jsonQueueName;
-    private String exchangeName;
-    private String jsonRoutingKey;
+    private String jsonQueueName="default";
+    private String exchangeName="default";
+    private String jsonRoutingKey="default";
 }
