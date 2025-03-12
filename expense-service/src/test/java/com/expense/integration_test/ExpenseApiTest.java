@@ -13,13 +13,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import static com.expense.configs.Constants.BASE_URL;
@@ -58,5 +56,14 @@ public class ExpenseApiTest {
         testSavingExpenseSuccessfully();
         assertDoesNotThrow(() -> restTemplate.exchange(BASE_URL.formatted(port, "expenses/%s".formatted(expenseId)),
                 HttpMethod.DELETE, null, Void.class));
+    }
+
+    @Test
+    @Order(3)
+    public void testGettingExpensesForUserSuccessfully() {
+        ResponseEntity<List> response = restTemplate.exchange(BASE_URL.formatted(port, "expenses?userId=%s".formatted(userId)),
+                HttpMethod.GET, null, List.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
     }
 }
