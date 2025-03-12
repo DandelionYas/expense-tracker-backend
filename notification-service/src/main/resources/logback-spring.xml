@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Property to define log file location -->
+    <property name="APP_NAME" value="notification-service" />
+    <property name="LOG_PATH" value="./logs" />
+    <property name="LOG_FILE" value="${LOG_PATH}/${APP_NAME}.log" />
+
+    <!-- Console Appender (logs to terminal) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Rolling File Appender (logs to file and rotates every hour) -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file>
+
+        <!-- Rolling policy to rotate logs every hour -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Log file naming pattern: logs/app-YYYY-MM-DD_HH.log.gz -->
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}-%d{yyyy-MM-dd_HH}.log.gz</fileNamePattern>
+
+            <!-- Keep logs for 183 days ~ six months -->
+            <maxHistory>183</maxHistory>
+
+            <!-- Compress rolled logs -->
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Root Logger (Logs everything at INFO level and above) -->
+    <root level="info">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>
