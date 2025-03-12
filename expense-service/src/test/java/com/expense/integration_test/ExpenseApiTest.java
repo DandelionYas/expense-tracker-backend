@@ -15,8 +15,11 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
@@ -64,8 +67,19 @@ public class ExpenseApiTest {
     @Test
     @Order(3)
     public void testGettingExpensesForUserSuccessfully() {
-        ResponseEntity<?> response = restTemplate.exchange(BASE_URL.formatted(port, "expenses?userId=%s".formatted(userId)),
+        // TODO: use UriComponents for all tests
+        UriComponents uri = UriComponentsBuilder.newInstance()
+                .scheme("http")
+                .host("localhost")
+                .port(port)
+                .path("/api/expenses")
+                .queryParam("userId", userId)
+                .queryParam("size", 10)
+                .queryParam("number", 0).build();
+
+        ResponseEntity<?> response = restTemplate.exchange(uri.toString(),
                 HttpMethod.GET, null, HelperPage.class);
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
     }
