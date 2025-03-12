@@ -7,10 +7,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -22,5 +21,10 @@ public class ExpenseController {
     @PostMapping
     public ResponseEntity<ExpenseResponseDto> createExpense(@RequestBody @Valid ExpenseDto expenseDto) {
         return new ResponseEntity<>(expenseService.addExpense(expenseDto), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{expenseId}")
+    public void deleteExpense(@PathVariable("expenseId") UUID expenseId) {
+        expenseService.deleteExpense(expenseId);
     }
 }

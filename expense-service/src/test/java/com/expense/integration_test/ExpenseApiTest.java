@@ -55,6 +55,7 @@ public class ExpenseApiTest {
     @Test
     @Order(2)
     public void testRemovingExpenseSuccessfully() {
+        testSavingExpenseSuccessfully();
         assertDoesNotThrow(() -> restTemplate.exchange(BASE_URL.formatted(port, "expenses/%s".formatted(expenseId)),
                 HttpMethod.DELETE, null, Void.class));
     }
