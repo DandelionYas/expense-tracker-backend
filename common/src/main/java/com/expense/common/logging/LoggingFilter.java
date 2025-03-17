@@ -45,5 +45,7 @@ public class LoggingFilter extends OncePerRequestFilter {
         log.info("Response: {} {}, Status: {}, Duration: {}ms, trackId: {}", request.getMethod(), request.getRequestURI(),
                 response.getStatus(), Duration.between(now, endTime).toMillis(), trackId);
         log.debug("Response Body: {} trackId: {}", new String(responseBody, StandardCharsets.UTF_8), trackId);
+
+        responseWrapper.copyBodyToResponse();
     }
 }
