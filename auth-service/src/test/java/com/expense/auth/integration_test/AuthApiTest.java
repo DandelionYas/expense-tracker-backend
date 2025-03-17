@@ -20,6 +20,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.UUID;
 
 import static com.expense.auth.configs.Constants.BASE_URL;
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,6 +40,8 @@ public class AuthApiTest {
     private String username;
     @Value("${test.password}")
     private String password;
+    @Value("${test.user.id}")
+    private UUID userId;
     private AccessTokenResponse tokenResponse;
     private String tempUserId;
 
@@ -130,5 +136,22 @@ public class AuthApiTest {
         headers.setBearerAuth(tokenResponse.getToken());
         assertDoesNotThrow(() -> restTemplate.exchange(BASE_URL.formatted(port, "users/%s".formatted(tempUserId)),
                 HttpMethod.DELETE, new HttpEntity<>(headers), Void.class));
+    }
+
+    @Test
+    @Order(6)
+    public void testAssigningRoleToUser() {
+        UriComponents uri = UriComponentsBuilder.newInstance()
+                .scheme("https")
+                .host("localhost")
+                .port(port)
+                .path("/api/users/")
+                .path(userId.toString())
+                .path("/role")
+                .path("/admin").build();
+        ResponseEntity<UserResponseDto> response = restTemplate.exchange(
+                BASE_URL.formatted(port, uri.toString()), HttpMethod.PUT, null, UserResponseDto.class);
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }
