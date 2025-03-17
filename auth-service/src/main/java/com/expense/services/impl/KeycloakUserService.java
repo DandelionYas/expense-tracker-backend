@@ -5,6 +5,7 @@ import com.expense.dtos.AccessTokenDto;
 import com.expense.dtos.UserRequestDto;
 import com.expense.dtos.UserResponseDto;
 import com.expense.exceptions.PasswordDecryptionException;
+import com.expense.exceptions.RoleNotFoundException;
 import com.expense.exceptions.UserNotCreatedException;
 import com.expense.exceptions.UserNotFoundException;
 import com.expense.mappers.AccessTokenMapper;
@@ -14,6 +15,9 @@ import com.expense.utils.EncryptionUtils;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RoleResource;
+import org.keycloak.admin.client.resource.RolesResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.representations.idm.CredentialRepresentation;
@@ -22,6 +26,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -105,6 +111,19 @@ public class KeycloakUserService implements UserService {
         getUsersResource().delete(userId);
     }
 
+
+    @Override
+    public UserResponseDto addRole(UUID userId, String roleName) {
+        RoleResource roleResource = Optional.ofNullable(getRolesResource().get(roleName)).orElseThrow(() ->
+                new RoleNotFoundException("Unable to find role. RoleName: %s".formatted(roleName)));
+
+        UserResource userResource = Optional.ofNullable(getUsersResource().get(userId.toString())).orElseThrow(() ->
+                new UserNotFoundException("Unable to find user. UserId: %s".formatted(userId)));
+
+        userResource.roles().realmLevel().add(List.of(roleResource.toRepresentation()));
+        return UserMapper.INSTANCE.entityToDto(userResource.toRepresentation());
+    }
+
     /**
      * User management can be done by APIs provided in UsersResource
      * @return UsersResource
@@ -113,5 +132,11 @@ public class KeycloakUserService implements UserService {
         return keycloak
                 .realm(keycloakProperties.getRealm())
                 .users();
+    }
+
+    private RolesResource getRolesResource() {
+        return keycloak
+                .realm(keycloakProperties.getRealm())
+                .roles();
     }
 }

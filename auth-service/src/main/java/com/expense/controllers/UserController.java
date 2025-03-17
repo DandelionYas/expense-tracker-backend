@@ -17,11 +17,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Validated
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
+
+    private final UserService userService;
 
     /**
      * Create user
@@ -37,9 +41,6 @@ public class UserController {
     public ResponseEntity<UserResponseDto> createUser(@RequestBody @Valid UserRequestDto userRequestDto) {
         return new ResponseEntity<>(userService.createUser(userRequestDto), HttpStatus.CREATED);
     }
-
-
-    private final UserService userService;
 
     /**
      * A public API to grant users and generated jwt token
@@ -93,5 +94,12 @@ public class UserController {
         userService.deleteUser(userId);
     }
 
-    // TODO: Implement Add Role API
+    @Operation(summary = "Add Role", description = "Update user by adding role to it")
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Role Added to the User")})
+    @PutMapping("/{id}/role/{role}")
+    public UserResponseDto updateUser(@PathVariable(value = "id") UUID userId,
+                                      @PathVariable(value = "role") String roleName) {
+        return userService.addRole(userId, roleName);
+    }
 }
