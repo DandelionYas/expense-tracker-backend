@@ -141,6 +141,8 @@ public class AuthApiTest {
     @Test
     @Order(6)
     public void testAssigningRoleToUser() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(tokenResponse.getToken());
         UriComponents uri = UriComponentsBuilder.newInstance()
                 .scheme("https")
                 .host("localhost")
@@ -150,7 +152,8 @@ public class AuthApiTest {
                 .path("/role")
                 .path("/admin").build();
         ResponseEntity<UserResponseDto> response = restTemplate.exchange(
-                BASE_URL.formatted(port, uri.toString()), HttpMethod.PUT, null, UserResponseDto.class);
+                uri.toString(), HttpMethod.PUT, new HttpEntity<>(headers), UserResponseDto.class);
+
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }

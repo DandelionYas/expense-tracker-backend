@@ -65,8 +65,15 @@ This service's development progress is much further than the others:
 - ✅ Use mapstruct as a clean way to map entities to response objects
 
 The remaining todo list for this service:
-- ⚠️ Implement addRole API 
 - ⚠️ Add logs in all required levels
+
+⚠️ Note: To enable Role Management and fix forbidden issue when calling AddRole API, you need to do this in keycloak dashboard:
+- Go to Clients 
+- Select "your" client 
+- Go to "Service Account Roles" Tab 
+- Use "Assign Role" and Filter by Client
+- Add "manage-clients" into the assigned roles.
+- Make sure "manage-users" is also assigned.
 
 ## Common module
 

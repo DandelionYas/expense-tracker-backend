@@ -20,6 +20,7 @@ import org.keycloak.admin.client.resource.RolesResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.authorization.client.AuthzClient;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpStatus;
@@ -114,13 +115,15 @@ public class KeycloakUserService implements UserService {
 
     @Override
     public UserResponseDto addRole(UUID userId, String roleName) {
-        RoleResource roleResource = Optional.ofNullable(getRolesResource().get(roleName)).orElseThrow(() ->
+        RoleResource roleResource = Optional.ofNullable(getClientRoles().get(roleName)).orElseThrow(() ->
                 new RoleNotFoundException("Unable to find role. RoleName: %s".formatted(roleName)));
 
         UserResource userResource = Optional.ofNullable(getUsersResource().get(userId.toString())).orElseThrow(() ->
                 new UserNotFoundException("Unable to find user. UserId: %s".formatted(userId)));
 
-        userResource.roles().realmLevel().add(List.of(roleResource.toRepresentation()));
+        userResource.roles().clientLevel(getClient().getId())
+                .add(List.of(roleResource.toRepresentation()));
+
         return UserMapper.INSTANCE.entityToDto(userResource.toRepresentation());
     }
 
@@ -134,9 +137,16 @@ public class KeycloakUserService implements UserService {
                 .users();
     }
 
-    private RolesResource getRolesResource() {
+    private ClientRepresentation getClient() {
+        return keycloak.realm(keycloakProperties.getRealm())
+                .clients().findByClientId(keycloakProperties.getClientId()).get(0);
+    }
+
+    private RolesResource getClientRoles() {
         return keycloak
                 .realm(keycloakProperties.getRealm())
+                .clients()
+                .get(getClient().getId())
                 .roles();
     }
 }
