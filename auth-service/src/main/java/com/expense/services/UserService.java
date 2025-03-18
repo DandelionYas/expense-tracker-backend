@@ -10,6 +10,6 @@ public interface UserService {
     UserResponseDto createUser(UserRequestDto user);
     AccessTokenDto login(String username, String password);
     UserResponseDto getUser(String username);
-    void deleteUser(String userId);
+    void deleteUser(UUID userId);
     UserResponseDto addRole(UUID userId, String role);
 }

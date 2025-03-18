@@ -84,13 +84,9 @@ public class UserController {
     @Operation(summary = "Delete User", description = "REST endpoint that deletes a user")
     @APIResponses(value = {
             @APIResponse(responseCode = "200", description = "User Deleted")})
-    // TODO: Check if User exists and return not found
     @PreAuthorize("hasRole('admin')")
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable(value = "id")
-                           @Pattern(regexp = "^[a-z0-9_]+$",
-                                   message = "Lowercase letters, numbers, and underscores only allowed for username")
-                           String userId) {
+    public void deleteUser(@PathVariable(value = "id") UUID userId) {
         userService.deleteUser(userId);
     }
 

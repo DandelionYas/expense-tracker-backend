@@ -5,29 +5,25 @@ import com.expense.dtos.LoginDto;
 import com.expense.dtos.UserRequestDto;
 import com.expense.dtos.UserResponseDto;
 import com.expense.utils.EncryptionUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.UUID;
-
 import static com.expense.auth.configs.Constants.BASE_URL;
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AuthApiTest {
     @LocalServerPort
@@ -40,8 +36,6 @@ public class AuthApiTest {
     private String username;
     @Value("${test.password}")
     private String password;
-    @Value("${test.user.id}")
-    private UUID userId;
     private AccessTokenResponse tokenResponse;
     private String tempUserId;
 
@@ -91,18 +85,20 @@ public class AuthApiTest {
      * Creating user has effect on keycloak
      * So for integration test, I decided to only test existing user
      * Conflict response will come back from keycloak
+     * Error will be wrapped to UserNotCreatedException
+     * @see com.expense.exceptions.UserNotCreatedException
      */
     @Test
     @Order(3)
-    public void testReturningConflictWhenCreatingExistingUser() throws Exception {
+    public void testReturningBadRequestWhenCreatingExistingUser() throws Exception {
         UserRequestDto userRequestDto = new UserRequestDto(username, "a@b.com", "Yaser", "Ghaderipour", encryptionUtils.encrypt(password));
         try {
-            ResponseEntity<UserRequestDto> entity = restTemplate.exchange(
+            restTemplate.exchange(
                     BASE_URL.formatted(port, "users/signup"),
                     HttpMethod.POST, new HttpEntity<>(userRequestDto),
                     UserRequestDto.class);
         } catch (Exception e) {
-            Assertions.assertEquals(HttpStatus.CONFLICT, ((HttpClientErrorException.Conflict) e).getStatusCode());
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST, ((HttpClientErrorException.BadRequest) e).getStatusCode());
         }
     }
 
@@ -125,21 +121,8 @@ public class AuthApiTest {
         assertEquals(tempUsername, response.getBody().username());
     }
 
-    /**
-     * Test removing an existing user
-     * Order is important specially for deleting the temp user
-     */
     @Test
     @Order(5)
-    public void testDeletingUserFromKeycloakById() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(tokenResponse.getToken());
-        assertDoesNotThrow(() -> restTemplate.exchange(BASE_URL.formatted(port, "users/%s".formatted(tempUserId)),
-                HttpMethod.DELETE, new HttpEntity<>(headers), Void.class));
-    }
-
-    @Test
-    @Order(6)
     public void testAssigningRoleToUser() {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(tokenResponse.getToken());
@@ -148,7 +131,7 @@ public class AuthApiTest {
                 .host("localhost")
                 .port(port)
                 .path("/api/users/")
-                .path(userId.toString())
+                .path(tempUserId)
                 .path("/role")
                 .path("/admin").build();
         ResponseEntity<UserResponseDto> response = restTemplate.exchange(
@@ -156,5 +139,18 @@ public class AuthApiTest {
 
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    /**
+     * Test removing an existing user
+     * Order is important specially for deleting the temp user
+     */
+    @Test
+    @Order(6)
+    public void testDeletingUserFromKeycloakById() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(tokenResponse.getToken());
+        assertDoesNotThrow(() -> restTemplate.exchange(BASE_URL.formatted(port, "users/%s".formatted(tempUserId)),
+                HttpMethod.DELETE, new HttpEntity<>(headers), Void.class));
     }
 }

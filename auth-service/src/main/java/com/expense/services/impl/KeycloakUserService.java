@@ -52,7 +52,7 @@ public class KeycloakUserService implements UserService {
         keycloakUser.setEmailVerified(false);
 
         if (keycloakUser.getCredentials()!= null && !keycloakUser.getCredentials().isEmpty()) {
-            CredentialRepresentation credential = keycloakUser.getCredentials().get(0);
+            CredentialRepresentation credential = keycloakUser.getCredentials().getFirst();
             String plainPassword;
             try {
                 plainPassword = encryptionUtils.decrypt(credential.getValue());
@@ -62,9 +62,10 @@ public class KeycloakUserService implements UserService {
             credential.setValue(plainPassword);
         }
 
-        Response keycloakResponse = getUsersResource().create(keycloakUser);
-        if (HttpStatus.CREATED.value() != keycloakResponse.getStatus()) {
-            throw new UserNotCreatedException(keycloakResponse.getStatusInfo().getReasonPhrase());
+        try (Response keycloakResponse = getUsersResource().create(keycloakUser)) {
+            if (HttpStatus.CREATED.value() != keycloakResponse.getStatus()) {
+                throw new UserNotCreatedException(keycloakResponse.getStatusInfo().getReasonPhrase());
+            }
         }
 
         return getUser(user.username());
@@ -107,12 +108,30 @@ public class KeycloakUserService implements UserService {
         return UserMapper.INSTANCE.entityToDto(userRepresentations.getFirst());
     }
 
+    /**
+     * Deletes user from keycloak
+     * @param userId the id of user to be deleted
+     */
     @Override
-    public void deleteUser(String userId) {
-        getUsersResource().delete(userId);
+    public void deleteUser(UUID userId) {
+        UsersResource usersResource = getUsersResource();
+        UserResource user = usersResource.get(userId.toString());
+        try {
+            user.toRepresentation();
+        } catch (Exception e) {
+            throw new UserNotFoundException("Unable to find user: %s".formatted(userId), e);
+        }
+        Response deleted = usersResource.delete(userId.toString());
+        deleted.close();
     }
 
 
+    /**
+     * Adds role to a user
+     * @param userId the id of user to be updated
+     * @param roleName the name of desired role
+     * @return UserDto
+     */
     @Override
     public UserResponseDto addRole(UUID userId, String roleName) {
         RoleResource roleResource = Optional.ofNullable(getClientRoles().get(roleName)).orElseThrow(() ->
@@ -137,11 +156,19 @@ public class KeycloakUserService implements UserService {
                 .users();
     }
 
+    /**
+     * Retrieves client from Keycloak
+     * @return Client Representation Object
+     */
     private ClientRepresentation getClient() {
         return keycloak.realm(keycloakProperties.getRealm())
-                .clients().findByClientId(keycloakProperties.getClientId()).get(0);
+                .clients().findByClientId(keycloakProperties.getClientId()).getFirst();
     }
 
+    /**
+     * Retrieves all roles defined in client level
+     * @return RoleResource containing all roles
+     */
     private RolesResource getClientRoles() {
         return keycloak
                 .realm(keycloakProperties.getRealm())
